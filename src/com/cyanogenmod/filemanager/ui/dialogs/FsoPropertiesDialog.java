@@ -480,7 +480,7 @@ public class FsoPropertiesDialog
                 if (superuser) {
                     this.mInfoMsgView.setOnClickListener(null);
                     this.mInfoMsgView.setVisibility(View.GONE);
-                    this.mInfoMsgView.setBackground(null);
+                    this.mInfoMsgView.setBackgroundDrawable(null); // Fix for CM9 (ICS)
 
                     // Enable controls
                     this.mSpnOwner.setEnabled(true);

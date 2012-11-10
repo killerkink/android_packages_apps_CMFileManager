@@ -317,7 +317,7 @@ public class FilesystemInfoDialog implements OnClickListener {
                     boolean mountAllowed = MountPointHelper.isMountAllowed(this.mMountPoint);
                     if (mountAllowed) {
                         this.mInfoMsgView.setVisibility(View.GONE);
-                        this.mInfoMsgView.setBackground(null);
+                        this.mInfoMsgView.setBackgroundDrawable(null); // Fix for CM9 (ICS)
                         this.mSwStatus.setEnabled(true);
                         this.mIsMountAllowed = true;
                         break;

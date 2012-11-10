@@ -301,7 +301,9 @@ public class NavigationActivity extends Activity
         //Initialize nfc adapter
         NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter != null) {
-            mNfcAdapter.setBeamPushUrisCallback(new NfcAdapter.CreateBeamUrisCallback() {
+//FIXME: Disabled for now; Not familiar with NFC stuff [yet]
+mNfcAdapter = null;
+/*            mNfcAdapter.setBeamPushUrisCallback(new NfcAdapter.CreateBeamUrisCallback() {
                 @Override
                 public Uri[] createBeamUris(NfcEvent event) {
                     List<FileSystemObject> selectedFiles = getNavigationView(NavigationActivity.
@@ -320,7 +322,7 @@ public class NavigationActivity extends Activity
                     }
                     return null;
                 }
-            }, this);
+            }, this);*/
         }
 
         // Show welcome message
