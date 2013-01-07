@@ -51,7 +51,7 @@ public abstract class AsyncResultProgram
      * @hide
      */
     final List<Byte> mPartialDataType;
-    private final Object mSync = new Object();
+    final Object mSync = new Object();
     /**
      * @hide
      */
@@ -106,7 +106,7 @@ public abstract class AsyncResultProgram
      * @hide
      */
     public final void onRequestStartParsePartialResult() {
-        this.mWorkerThread = new AsyncResultProgramThread(this.mSync);
+        this.mWorkerThread = new AsyncResultProgramThread();
         this.mWorkerThread.start();
 
         //Notify start to command class
@@ -132,7 +132,7 @@ public abstract class AsyncResultProgram
         }
         synchronized (this.mTerminateSync) {
             try {
-                this.mSync.wait();
+                this.mTerminateSync.wait();
             } catch (Exception e) {
                 /**NON BLOCK**/
             }
@@ -176,6 +176,7 @@ public abstract class AsyncResultProgram
     public final void onRequestParsePartialResult(String partialIn) {
         synchronized (this.mSync) {
             String data = partialIn;
+            String rest = ""; //$NON-NLS-1$
             if (parseOnlyCompleteLines()) {
                 int pos = partialIn.lastIndexOf(FileHelper.NEWLINE);
                 if (pos == -1) {
@@ -186,11 +187,12 @@ public abstract class AsyncResultProgram
 
                 //Retrieve the data
                 data = this.mTempBuffer.append(partialIn.substring(0, pos + 1)).toString();
+                rest = partialIn.substring(pos + 1);
             }
 
             this.mPartialDataType.add(STDIN);
             this.mPartialData.add(data);
-            this.mTempBuffer = new StringBuffer();
+            this.mTempBuffer = new StringBuffer(rest);
             this.mSync.notify();
         }
     }
@@ -204,6 +206,7 @@ public abstract class AsyncResultProgram
     public final void parsePartialErrResult(String partialErr) {
         synchronized (this.mSync) {
             String data = partialErr;
+            String rest = ""; //$NON-NLS-1$
             if (parseOnlyCompleteLines()) {
                 int pos = partialErr.lastIndexOf(FileHelper.NEWLINE);
                 if (pos == -1) {
@@ -214,11 +217,12 @@ public abstract class AsyncResultProgram
 
                 //Retrieve the data
                 data = this.mTempBuffer.append(partialErr.substring(0, pos + 1)).toString();
+                rest = partialErr.substring(pos + 1);
             }
 
             this.mPartialDataType.add(STDERR);
             this.mPartialData.add(data);
-            this.mTempBuffer = new StringBuffer();
+            this.mTempBuffer = new StringBuffer(rest);
             this.mSync.notify();
         }
     }
@@ -349,16 +353,12 @@ public abstract class AsyncResultProgram
      */
     private class AsyncResultProgramThread extends Thread {
         boolean mAlive = true;
-        private final Object mSyncObj;
 
         /**
          * Constructor of <code>AsyncResultProgramThread</code>.
-         *
-         * @param sync The synchronized object
          */
-        AsyncResultProgramThread(Object sync) {
+        AsyncResultProgramThread() {
             super();
-            this.mSyncObj = sync;
         }
 
         /**
@@ -369,8 +369,8 @@ public abstract class AsyncResultProgram
             try {
                 this.mAlive = true;
                 while (this.mAlive) {
-                   synchronized (this.mSyncObj) {
-                       this.mSyncObj.wait();
+                   synchronized (AsyncResultProgram.this.mSync) {
+                       AsyncResultProgram.this.mSync.wait();
                        while (AsyncResultProgram.this.mPartialData.size() > 0) {
                            if (!this.mAlive) {
                                return;
